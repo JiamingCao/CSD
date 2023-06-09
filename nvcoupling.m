@@ -1,5 +1,6 @@
-function dydt = nvcoupling(t, y, inputK, inputGlu, inputT, P, ratioPump)
+function dydt = nvcoupling(t, y, inputK, inputGlu, inputT, P, ratioPump, BK_shift)
  % Modified David astrocyte assuming that potential change comes only from flux of potassium
+ % ratioPump: efficiency ratio of SERCA pump [0,1]
     Ca_astr = y(1);  % nM
     Ca_ER = y(2);  % nM
     IP3 = y(3);  % uM
@@ -21,7 +22,7 @@ function dydt = nvcoupling(t, y, inputK, inputGlu, inputT, P, ratioPump)
     J_max = 2.88e6;  % nM s-1
     K_I = 0.03;  % uM
     K_act = 170;  % nM
-    V_max = 2e4;  % nM s-1
+    V_max = 2e4 * ratioPump;  % nM s-1
     k_pump = 240;  % uM
     P_L = 5.2e3;  % nM s-1 (Fink says 0.0804 uM s-1)
     B_cyt = 2.44e-2;  % NO UNIT
@@ -44,9 +45,7 @@ function dydt = nvcoupling(t, y, inputK, inputGlu, inputT, P, ratioPump)
     v_BK = -95.;  % mV
     v_ca = 80.0;  % mV
     v_K = -90.0;  % mV
-%     J_NaKmax_prime = 15e-11 * ratioPump;  % C s-1
-%     J_NaKmax_prime = 1e-10 * ratioPump;  % C s-1
-    J_NaKmax_prime = 1.8e-10 * ratioPump;  % C s-1
+    J_NaKmax_prime = 1.8e-10;  % C s-1
     KKoa = 1.5;  % mM
     C_astr = 4e-14;  % C mV-1
     EET_shift = 2.;  % mV uM-1
@@ -157,7 +156,7 @@ function dydt = nvcoupling(t, y, inputK, inputGlu, inputT, P, ratioPump)
 
     dydt(5) = V_eet * (Ca_astr / 1000 - Ca_min) - k_eet * EET;
 
-    v3_astr = -0.5 * v5 * tanh((Ca_astr - Ca3) / Ca4) + v6;
+    v3_astr = -0.5 * v5 * tanh((Ca_astr - Ca3) / Ca4) + v6 + BK_shift;
     lambda_BK = phi_n * cosh((Vk - v3_astr) / 2 / v4);
     n_BK_infty = 0.5 * (1 + tanh((Vk + EET_shift * EET - v3_astr) / v4));
     dydt(6) = lambda_BK * (n_BK_infty - n_BK);

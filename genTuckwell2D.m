@@ -1,6 +1,6 @@
 function [T_vec, K_result, Ca_result, Na_result, Cl_result, glu_result, gaba_result] = genTuckwell2D(ratio)
-dt = 5e-3;
-dx = 1e-2;
+dt = 5e-3;  % Temporal step size for forward Euler method
+dx = 1e-2;  % Spatial step size for forward Euler method
 max_t = 6;
 L = 1;
 [xv, yv] = meshgrid(-L:dx:L, -L:dx:L);
@@ -15,12 +15,12 @@ u3 = (ones(size(xv)) * Na_oR);
 u4 = (ones(size(xv)) * Cl_oR);
 u5 = (zeros(size(xv)));
 u6 = u5;
-patch = 17 * exp(-(xv.^2 + yv.^2)/ (0.05^2));
+patch = 17 * exp(-(xv.^2 + yv.^2)/ (0.05^2));   % Injection of KCl
 u1=u1+patch;
 u4=u4+patch;
 
 T_vec=0:dt:max_t;
-u0 = cat(3, u1, u2, u3, u4, u5, u6);
+u0 = cat(3, u1, u2, u3, u4, u5, u6);    % Initial condition
 u=u0;
 K_result=(zeros([size(xv),length(T_vec)]));
 K_result(:,:,1)=(u1);
@@ -84,7 +84,7 @@ k13 = 0.;
 k14 = 104.064;
 k15 = -3.47;
 k16 = -3.15;
-k17 = 577.895*ratio;
+k17 = 577.895*ratio;    % Multiply by ratio to account for reduced pump efficiency
 k18 = 2.5;
 k19 = 2.5;
 k20 = 0.8;
@@ -104,7 +104,7 @@ R = 8.31;  % V C mol-1 K-1
 T = 310.;  % K
 
 cnt = 2;
-for time = dt:dt:max_t
+for time = dt:dt:max_t  % Solve the differential equations using forward Euler method
     K_o = u(:,:,1);
     Ca_o = u(:,:,2);
     Na_o = u(:,:,3);
@@ -210,7 +210,7 @@ for time = dt:dt:max_t
     cnt=cnt+1;
 end
 
-figure,plot(squeeze(K_result(101,151,:)));
+% figure,plot(squeeze(K_result(101,151,:)));
 end
 
 function out=heaviside(in)
